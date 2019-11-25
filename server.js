@@ -2,8 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const db = require('./config/keys').mongoURI;
-
-// const users = require('./routes/api/users');
+const users = require('./routes/users');
 // const profile = require('./routes/api/profile');
 // const posts = require('./routes/api/posts');
 
@@ -25,7 +24,7 @@ app.get('/', (req, res) => {
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// app.use('/api/users', users);
+app.use('/api/users', users);
 // app.use('/api/posts', posts);
 // app.use('/api/profile', profile);
 
