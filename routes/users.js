@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config/keys');
 const User = require('../models/User');
+const checkToken = require('../middlewares/check-token');
 
 
 // @route   GET api/users
@@ -57,7 +58,7 @@ router.post('/register', (req, res) => {
                                 console.log(error);
                                 res.status(400).json({
                                     success: false,
-                                    message: 'error occured during encryption'
+                                    message: `error occured during encryption, ${error}`
                                 })
                             })
                     })
@@ -81,38 +82,65 @@ router.post('/login', (req, res) => {
                     success: false,
                     message: 'user not found'
                 })
-            }
-            bcrypt.compare(password, user.password)
-                .then(isMatch => {
-                    if (isMatch) {
-                        const payload = {
-                            name: user.name,
-                            username: user.username,
-                            avatar: user.avatar,
-                            id: user._id
+            } else if (user) {
+                bcrypt.compare(password, user.password)
+                    .then(isMatch => {
+                        if(!isMatch) {
+                            res.json({
+                                success: false,
+                                message: 'Password seems incorrect. Authentication failed!'
+                            });
+                        } else {
+                            var token = jwt.sign({user: user}, config.secret, { expiresIn: '7d' });
+                            res.status(200).json({
+                                success: true,
+                                token: token
+                            })
                         }
-                        jwt.sign(payload, config.secret, { expiresIn: 86400 }, (error, token) => {
-                            if (error) {
-                                res.status(408).json({
-                                    success: false,
-                                    message: 'some error occured'
-                                })
-                            } else {
-                                res.status(200).json({
-                                    success: true,
-                                    token: 'Bearer ' + token
-                                })
-                            }
-                        })
-                    } else {
-                        return res.status(400).json({
-                            success: false,
-                            message: 'Incorrect password'
-                        })
-                    }
-                })
+                    })
+            }
+
         })
 })
+
+router.route('/profile')
+    .get(checkToken, (req, res, next) => {
+        User.findOne({ _id: req.decoded.user._id}, (err, user) => {
+            if (err) {
+                res.json({
+                    success: false,
+                    message: `some error occured, try later, ${err}`
+                });
+            } else {
+                res.status(200).json({
+                    success: true,
+                    message: 'successful',
+                    user: user
+                });
+            }
+        })
+    })
+    .post(checkToken, (req, res, next) => {
+        User.findOne({_id: req.decoded.user._id}, (err, user) => {
+            if (err) {
+                return next(err);
+            }
+            if (req.body.name) {
+                user.name = req.body.name
+            }
+            if (req.body.username) {
+                user.name = req.body.name
+            }
+            if (req.body.bio) {
+                user.name = req.body.name
+            }
+            user.save();
+            res.status(200).json({
+                success: true,
+                message: 'update successful'
+            });
+        })
+    })
 
 
 
