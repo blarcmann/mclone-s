@@ -11,6 +11,6 @@ const UserSchema = new Schema({
     articles : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
     favorites : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-});
+}, {timestamps: true});
 
 module.exports = User = mongoose.model('users', UserSchema);

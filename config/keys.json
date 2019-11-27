@@ -1,4 +1,7 @@
 {
     "mongoURI": "mongodb://admin:mcloneADMIN1@ds027819.mlab.com:27819/mclone",
-    "secret": "whatever"
+    "secret": "whatever",
+    "cloud_name": "mclone",
+    "api_key": "862867466392527",
+    "api_secret": "DLU6M1a6peBbh0Um88n9UxorP2E"
 }

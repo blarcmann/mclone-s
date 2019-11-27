@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const db = require('./config/keys').mongoURI;
 const users = require('./routes/users');
+const articles = require('./routes/articles');
+const fileUpload = require('express-fileupload');
 // const profile = require('./routes/api/profile');
 // const posts = require('./routes/api/posts');
 
@@ -24,7 +26,11 @@ app.get('/', (req, res) => {
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(fileUpload({
+    useTempFiles: true
+}));
 app.use('/api/users', users);
+app.use('/api/articles', articles);
 // app.use('/api/posts', posts);
 // app.use('/api/profile', profile);
 

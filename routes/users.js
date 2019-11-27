@@ -55,7 +55,6 @@ router.post('/register', (req, res) => {
                                 })
                             })
                             .catch(error => {
-                                console.log(error);
                                 res.status(400).json({
                                     success: false,
                                     message: `error occured during encryption, ${error}`
@@ -120,7 +119,7 @@ router.route('/profile')
             }
         })
     })
-    .post(checkToken, (req, res, next) => {
+    .put(checkToken, (req, res, next) => {
         User.findOne({_id: req.decoded.user._id}, (err, user) => {
             if (err) {
                 return next(err);
