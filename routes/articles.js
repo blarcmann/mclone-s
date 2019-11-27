@@ -12,10 +12,14 @@ cloudinary.config({
     api_secret: config.api_secret
 });
 
-
+router.get('/', (req, res) => {
+    return res.send('it worked bitch!');
+})
 
 router.post('/create_article', checkToken, (req, res) => {
-    User.findById({ _id: req.body.id })
+    console.log(req.body);
+    console.log(req.files.feature_img);
+    User.findById({ _id: req.body.author })
         .then(user => {
             if (!user) {
                 return res.status(404).json({
@@ -23,8 +27,8 @@ router.post('/create_article', checkToken, (req, res) => {
                     message: 'user not found, dummy!'
                 })
             }
-            if (req.body.feature_img) {
-                const file = req.body.feature_img;
+            if (req.files.feature_img) {
+                const file = req.files.feature_img;
                 cloudinary.uploader.upload(file.tempFilePath, (err, result) => {
                     if (err) {
                         console.log('error occured while uploading', err);
@@ -43,6 +47,11 @@ router.post('/create_article', checkToken, (req, res) => {
                         author: req.body.author
                     })
                     article.save();
+                    res.status(201).json({
+                        success: true,
+                        message: 'successful',
+                        article
+                    });
                 })
             } else {
                 let article = new Article({
@@ -54,7 +63,59 @@ router.post('/create_article', checkToken, (req, res) => {
                     feature_img: ''
                 })
                 article.save();
+                res.status(201).json({
+                    success: true,
+                    message: 'successful',
+                    article
+                });
             }
+
+        })
+});
+
+router.get('/count', (req, res) => {
+    Article.countDocuments({}, (err, totalAr) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: 'wooo, mii ri ka'
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            count: totalAr
+        })
+    })
+})
+
+
+router.get('/all', (req, res) => {
+    let skip = 0;
+    let limit = 10;
+    if (typeof req.query.limit !== 'undefined') {
+        limit = req.query.limit;
+    }
+    if (typeof req.query.skip !== 'undefined') {
+        skip = req.query.skip;
+    }
+
+    Article.find({})
+        .skip(Number(skip))
+        .limit(Number(limit))
+        .populate('author')
+        .sort({ createdAt: 'desc' })
+        .exec((err, articles) => {
+            if (err) {
+                console.log('error occured', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'internal server error'
+                })
+            }
+            res.status(200).json({
+                success: true,
+                articles
+            })
         })
 })
 
