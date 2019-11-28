@@ -13,4 +13,4 @@ const UserSchema = new Schema({
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, {timestamps: true});
 
-module.exports = User = mongoose.model('users', UserSchema);
+module.exports = User = mongoose.model('User', UserSchema);

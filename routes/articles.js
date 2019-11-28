@@ -17,8 +17,6 @@ router.get('/', (req, res) => {
 })
 
 router.post('/create_article', checkToken, (req, res) => {
-    console.log(req.body);
-    console.log(req.files.feature_img);
     User.findById({ _id: req.body.author })
         .then(user => {
             if (!user) {
@@ -73,7 +71,7 @@ router.post('/create_article', checkToken, (req, res) => {
         })
 });
 
-router.get('/count', (req, res) => {
+router.get('/count', checkToken, (req, res) => {
     Article.countDocuments({}, (err, totalAr) => {
         if (err) {
             return res.status(500).json({
@@ -89,7 +87,7 @@ router.get('/count', (req, res) => {
 })
 
 
-router.get('/all', (req, res) => {
+router.get('/all', checkToken, (req, res) => {
     let skip = 0;
     let limit = 10;
     if (typeof req.query.limit !== 'undefined') {
