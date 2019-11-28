@@ -87,6 +87,122 @@ router.get('/count', checkToken, (req, res) => {
 })
 
 
+router.get('/article/:id', checkToken, (req, res) => {
+    Article.findById({ _id: req.params.id })
+        .populate('author')
+        .exec((err, article) => {
+            if (err) {
+                console.log('err occured', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'error occured'
+                })
+            }
+            if (!article) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'article not found'
+                })
+            }
+            res.status(200).json({
+                success: true,
+                article
+            })
+        })
+})
+
+router.put('/article/:id', checkToken, (req, res) => {
+    Article.findById({ _id: req.params.id }, (err, article) => {
+        if (err) {
+            console.log('err occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!article) {
+            return res.status(404).json({
+                success: false,
+                message: 'article not found'
+            })
+        }
+
+        if (req.body.title) article.title = req.body.title;
+        if (req.body.body) article.body = req.body.body;
+        if (req.body.description) article.description = req.body.description;
+        if (req.body.tags) article.tags = req.body.tags;
+        article.save();
+        res.status(200).json({
+            success: true,
+            article
+        })
+    })
+})
+
+router.post('/article/:id/clap', (req, res) => {
+    Article.findById({ _id: req.params.id }, (err, article) => {
+        if (err) {
+            console.log('err occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!article) {
+            return res.status(404).json({
+                success: false,
+                message: 'article not found'
+            })
+        }
+        return article.clap().then(() => {
+            res.status(200).json({
+                success: true,
+                article
+            })
+        })
+    })
+})
+
+router.delete('/article/:id', checkToken, (req, res) => {
+    User.findOne({ _id: req.decoded.user._id }, (err, user) => {
+        if (err) {
+            console.log('err occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        Article.findById({ _id: req.params.id }, (err, article) => {
+            if (err) {
+                console.log('err occured', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'error occured'
+                })
+            }
+            if (!article) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'article not found'
+                })
+            }
+
+            if (req.body.author_id.toString() === user._id.toString()) {
+                article.remove();
+                res.status(200).json({
+                    success: true,
+                    message: 'article deleted'
+                })
+            } else {
+                return res.status(403).json({
+                    success: false,
+                    message: 'id does not match'
+                })
+            }
+        })
+    })
+})
+
 router.get('/all', checkToken, (req, res) => {
     let skip = 0;
     let limit = 10;
@@ -96,11 +212,10 @@ router.get('/all', checkToken, (req, res) => {
     if (typeof req.query.skip !== 'undefined') {
         skip = req.query.skip;
     }
-
     Article.find({})
         .skip(Number(skip))
         .limit(Number(limit))
-        .populate('author')
+        .populate('author', 'name _id')
         .sort({ createdAt: 'desc' })
         .exec((err, articles) => {
             if (err) {

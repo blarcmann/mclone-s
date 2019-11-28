@@ -7,11 +7,17 @@ const ArticleSchema = new Schema({
     description: {type: String, required: true},
     body: {type: String, required: true},
     feature_img: String,
-    favourites: {type: Number, default: 0},
+    claps: {type: Number, default: 0},
     tags: [{type: String, required: true}],
     author: [{ type: Schema.Types.ObjectId, ref: 'User'}],
     comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}]
 }, {timestamps: true})
+
+
+ArticleSchema.methods.clap = function() {
+    this.claps++
+    return this.save()
+}
 
 
 module.exports = Article = mongoose.model('Article', ArticleSchema);
