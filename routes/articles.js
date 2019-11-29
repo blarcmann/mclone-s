@@ -92,9 +92,9 @@ router.post('/article/:id/comment', checkToken, (req, res) => {
             author: req.body.author,
             article: req.body.article
         });
+        comment.save();
         article.comments.push(comment);
         article.save();
-        comment.save();
         return res.status(201).json({
             success: true,
             article
@@ -104,7 +104,11 @@ router.post('/article/:id/comment', checkToken, (req, res) => {
 
 router.get('/article/:id/comments', (req, res) => {
     Article.findById({ _id: req.params.id })
-        .populate('comments')
+        .populate({
+            path: 'comments',
+            populate: { path: 'author', select: 'name _id' },
+            options: { sort: { createdAt: 'desc' } }
+        })
         .exec((err, article) => {
             if (err) {
                 console.log('err occured', err);
@@ -143,20 +147,21 @@ router.delete('/article/:id/:comment', checkToken, (req, res) => {
                     message: 'error occured'
                 })
             }
-            if (req.body.author_id.toString() === user._id.toString()) {
-                article.comments.remove(req.body.comment_id).then(deleted => {
+            Comment.deleteOne({ _id: req.body.comment_id })
+                .then(comments => {
+                    article.comments.remove(req.body.comment_id)
                     article.save();
                     res.status(200).json({
                         success: true,
                         comments: article.comments
                     })
                 }).catch(err => {
+                    console.log('err occured ', err);
                     return res.status(500).json({
                         success: false,
                         message: 'error occured'
                     })
                 })
-            }
         })
     })
 })

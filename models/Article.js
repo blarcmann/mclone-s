@@ -9,7 +9,7 @@ const ArticleSchema = new Schema({
     feature_img: String,
     claps: {type: Number, default: 0},
     tags: [{type: String, required: true}],
-    author: [{ type: Schema.Types.ObjectId, ref: 'User'}],
+    author: { type: Schema.Types.ObjectId, ref: 'User'},
     comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}]
 }, {timestamps: true})
 
