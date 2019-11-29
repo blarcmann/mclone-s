@@ -3,6 +3,7 @@ const router = express.Router();
 const config = require('../config/keys');
 const User = require('../models/User');
 const Article = require('../models/Article');
+const Comment = require('../models/Comment');
 const checkToken = require('../middlewares/check-token');
 const cloudinary = require('cloudinary').v2;
 
@@ -71,23 +72,96 @@ router.post('/create_article', checkToken, (req, res) => {
         })
 });
 
-router.get('/count', checkToken, (req, res) => {
-    Article.countDocuments({}, (err, totalAr) => {
+router.post('/article/:id/comment', checkToken, (req, res) => {
+    Article.findById({ _id: req.params.id }, (err, article) => {
         if (err) {
+            console.log('err occured', err);
             return res.status(500).json({
                 success: false,
-                message: 'wooo, mii ri ka'
+                message: 'error occured'
             })
         }
-        return res.status(200).json({
+        if (!article) {
+            return res.status(404).json({
+                success: false,
+                message: 'article not found'
+            })
+        }
+        let comment = new Comment({
+            body: req.body.body,
+            author: req.body.author,
+            article: req.body.article
+        });
+        article.comments.push(comment);
+        article.save();
+        comment.save();
+        return res.status(201).json({
             success: true,
-            count: totalAr
+            article
         })
     })
 })
 
+router.get('/article/:id/comments', (req, res) => {
+    Article.findById({ _id: req.params.id })
+        .populate('comments')
+        .exec((err, article) => {
+            if (err) {
+                console.log('err occured', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'error occured'
+                })
+            }
+            if (!article) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'article not found'
+                })
+            }
+            return res.status(200).json({
+                success: true,
+                comments: article.comments
+            })
+        })
+})
 
-router.get('/article/:id', checkToken, (req, res) => {
+router.delete('/article/:id/:comment', checkToken, (req, res) => {
+    User.findOne({ _id: req.decoded.user._id }, (err, user) => {
+        if (err) {
+            console.log('err occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        Article.findById({ _id: req.params.id }, (err, article) => {
+            if (err) {
+                console.log('err occured ', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'error occured'
+                })
+            }
+            if (req.body.author_id.toString() === user._id.toString()) {
+                article.comments.remove(req.body.comment_id).then(deleted => {
+                    article.save();
+                    res.status(200).json({
+                        success: true,
+                        comments: article.comments
+                    })
+                }).catch(err => {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'error occured'
+                    })
+                })
+            }
+        })
+    })
+})
+
+router.get('/article/:id', (req, res) => {
     Article.findById({ _id: req.params.id })
         .populate('author')
         .exec((err, article) => {
@@ -139,7 +213,7 @@ router.put('/article/:id', checkToken, (req, res) => {
     })
 })
 
-router.post('/article/:id/clap', (req, res) => {
+router.post('/article/:id/clap', checkToken, (req, res) => {
     Article.findById({ _id: req.params.id }, (err, article) => {
         if (err) {
             console.log('err occured', err);
@@ -203,7 +277,22 @@ router.delete('/article/:id', checkToken, (req, res) => {
     })
 })
 
-router.get('/all', checkToken, (req, res) => {
+router.get('/count', (req, res) => {
+    Article.countDocuments({}, (err, totalAr) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: 'wooo, mii ri ka'
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            count: totalAr
+        })
+    })
+})
+
+router.get('/all', (req, res) => {
     let skip = 0;
     let limit = 10;
     if (typeof req.query.limit !== 'undefined') {

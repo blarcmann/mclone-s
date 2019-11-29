@@ -5,8 +5,6 @@ const db = require('./config/keys').mongoURI;
 const users = require('./routes/users');
 const articles = require('./routes/articles');
 const fileUpload = require('express-fileupload');
-// const profile = require('./routes/api/profile');
-// const posts = require('./routes/api/posts');
 
 const app = express();
 
@@ -31,8 +29,6 @@ app.use(fileUpload({
 }));
 app.use('/api/users', users);
 app.use('/api/articles', articles);
-// app.use('/api/posts', posts);
-// app.use('/api/profile', profile);
 
 const port = process.env.PORT || 5000;
 

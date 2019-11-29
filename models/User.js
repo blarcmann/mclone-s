@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Article = require('./Article');
+
 
 const UserSchema = new Schema({
     name: { type: String, required: true },
@@ -8,9 +10,10 @@ const UserSchema = new Schema({
     bio: { type: String },
     password: { type: String, required: true },
     avatar: { type: String },
-    articles : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
-    favorites : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    articles : [{ type: Schema.Types.ObjectId, ref: 'Article' }],
+    favorites : [{ type: Schema.Types.ObjectId, ref: 'Article' }],
+    following: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 }, {timestamps: true});
 
 module.exports = User = mongoose.model('User', UserSchema);
+
