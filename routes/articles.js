@@ -282,6 +282,58 @@ router.delete('/article/:id', checkToken, (req, res) => {
     })
 })
 
+router.post('/article/:id/favorite', checkToken, (req, res) => {
+    User.findById({ _id: req.body.userId }, (err, user) => {
+        if (err) {
+            console.log('error occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!user) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'user not found'
+                })
+            }
+        }
+        user.favorite(req.params.id);
+        return res.status(200).json({
+            success: true,
+            user
+        })
+    })
+})
+
+router.delete('/article/:id/unfavorite', checkToken, (req, res) => {
+    User.findById({ _id: req.body.userId }, (err, user) => {
+        if (err) {
+            console.log('error occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!user) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'user not found'
+                })
+            }
+        }
+        user.unfavorite(req.params.id);
+        return res.status(200).json({
+            success: true,
+            user
+        })
+    })
+})
+
 router.get('/count', (req, res) => {
     Article.countDocuments({}, (err, totalAr) => {
         if (err) {
@@ -300,13 +352,20 @@ router.get('/count', (req, res) => {
 router.get('/all', (req, res) => {
     let skip = 0;
     let limit = 10;
+    let query = {};
     if (typeof req.query.limit !== 'undefined') {
         limit = req.query.limit;
     }
     if (typeof req.query.skip !== 'undefined') {
         skip = req.query.skip;
     }
-    Article.find({})
+    if (typeof req.query.skip !== 'undefined') {
+        skip = req.query.skip;
+    }
+    if (typeof req.query.tag !== 'undefined') {
+        query.tags = { "$in": [req.query.tag] };
+    }
+    Article.find(query)
         .skip(Number(skip))
         .limit(Number(limit))
         .populate('author', 'name _id')

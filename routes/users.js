@@ -85,13 +85,13 @@ router.post('/login', (req, res) => {
             } else if (user) {
                 bcrypt.compare(password, user.password)
                     .then(isMatch => {
-                        if(!isMatch) {
+                        if (!isMatch) {
                             res.json({
                                 success: false,
                                 message: 'Password seems incorrect. Authentication failed!'
                             });
                         } else {
-                            var token = jwt.sign({user: user}, config.secret, { expiresIn: '7d' });
+                            var token = jwt.sign({ user: user }, config.secret, { expiresIn: '7d' });
                             res.status(200).json({
                                 success: true,
                                 token: token
@@ -105,7 +105,7 @@ router.post('/login', (req, res) => {
 
 router.route('/profile')
     .get(checkToken, (req, res, next) => {
-        User.findOne({ _id: req.decoded.user._id}, (err, user) => {
+        User.findOne({ _id: req.decoded.user._id }, (err, user) => {
             if (err) {
                 res.json({
                     success: false,
@@ -121,7 +121,7 @@ router.route('/profile')
         })
     })
     .put(checkToken, (req, res, next) => {
-        User.findOne({_id: req.decoded.user._id}, (err, user) => {
+        User.findOne({ _id: req.decoded.user._id }, (err, user) => {
             if (err) {
                 return next(err);
             }
@@ -142,6 +142,56 @@ router.route('/profile')
         })
     })
 
+router.post('/follow/:id', checkToken, (req, res) => {
+    User.findById({ _id: req.body.userId }, (err, user) => {
+        if (err) {
+            console.log('err occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!user) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'user not found'
+                })
+            }
+        }
+        user.follow(req.params.id);
+        return res.status(200).json({
+            success: true,
+            user
+        })
+    })
+})
 
+router.delete('/unfollow/:id', checkToken, (req, res) => {
+    User.findById({ _id: req.body.userId }, (err, user) => {
+        if (err) {
+            console.log('err occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!user) {
+            if (err) {
+                console.log('err occured', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'error occured'
+                })
+            }
+        }
+        user.unfollow(req.params.id);
+        return res.status(200).json({
+            success: true,
+            user
+        })
+    })
+})
 
 module.exports = router;

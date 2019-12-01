@@ -19,5 +19,13 @@ ArticleSchema.methods.clap = function() {
     return this.save()
 }
 
+ArticleSchema.methods.updateFavoriteCount = function(){
+    var article = this;
+    return User.count({favorites: {$in: [article._id]}}).then(function(count){
+        article.favoritesCount = count;
+        return article.save();
+    });
+};
+
 
 module.exports = Article = mongoose.model('Article', ArticleSchema);
