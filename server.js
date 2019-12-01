@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const db = require('./config/keys').mongoURI;
 const users = require('./routes/users');
 const articles = require('./routes/articles');
+const tags = require('./routes/tags');
 const fileUpload = require('express-fileupload');
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(fileUpload({
 }));
 app.use('/api/users', users);
 app.use('/api/articles', articles);
+app.use('/api/tags', tags);
 
 const port = process.env.PORT || 5000;
 
