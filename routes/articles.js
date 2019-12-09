@@ -42,8 +42,12 @@ router.post('/create_article', checkToken, (req, res) => {
                         body: req.body.body,
                         description: req.body.title,
                         feature_img: img_url,
-                        tags: req.body.tags,
                         author: req.body.author
+                    });
+                    // article.tags.push(req.body.tags);
+                    let allTags = req.body.tags;
+                    allTags.forEach(tag => {
+                        article.tags.push(tag);
                     })
                     article.save();
                     res.status(201).json({
