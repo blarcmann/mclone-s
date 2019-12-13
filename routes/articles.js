@@ -372,7 +372,7 @@ router.get('/all', (req, res) => {
     Article.find(query)
         .skip(Number(skip))
         .limit(Number(limit))
-        .populate('author', 'name _id')
+        .populate('author', 'name _id username',)
         .sort({ createdAt: 'desc' })
         .exec((err, articles) => {
             if (err) {
