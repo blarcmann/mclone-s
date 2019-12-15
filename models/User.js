@@ -46,8 +46,8 @@ UserSchema.methods.unfavorite = function (id) {
     return this.save();
 };
 
-UserSchema.methods.isFavorite = function (id) {
-    return this.favorites.some(function (favoriteId) {
+UserSchema.methods.isFavorite = function(id){
+    return this.favorites.some(function(favoriteId){
         return id.toString() === favoriteId.toString();
     });
 };

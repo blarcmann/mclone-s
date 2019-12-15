@@ -40,17 +40,14 @@ router.post('/create_article', checkToken, (req, res) => {
                     let article = new Article({
                         title: req.body.title,
                         body: req.body.body,
-                        description: req.body.title,
+                        tag: req.body.tag,
+                        description: req.body.description,
                         feature_img: img_url,
+                        favorited: false,
                         author: req.body.author
                     });
-                    // article.tags.push(req.body.tags);
-                    let allTags = req.body.tags;
-                    allTags.forEach(tag => {
-                        article.tags.push(tag);
-                    })
                     article.save();
-                    res.status(201).json({
+                    return res.status(201).json({
                         success: true,
                         message: 'successful',
                         article
@@ -60,8 +57,9 @@ router.post('/create_article', checkToken, (req, res) => {
                 let article = new Article({
                     title: req.body.title,
                     body: req.body.body,
-                    description: req.body.title,
-                    tags: req.body.tags,
+                    description: req.body.description,
+                    tag: req.body.tag,
+                    favorited: false,
                     author: req.body.author,
                     feature_img: ''
                 })
@@ -209,11 +207,20 @@ router.put('/article/:id', checkToken, (req, res) => {
                 message: 'article not found'
             })
         }
+        if (article.favorites && article.favorites.length !== 0) {
+            article.favorites.forEach(fav => {
+                if (fav === req.decoded.user._id) {
+                    return article.favorited = true;
+                } else {
+                    return article.favorited = false;
+                }
+            })
+        }
 
         if (req.body.title) article.title = req.body.title;
         if (req.body.body) article.body = req.body.body;
         if (req.body.description) article.description = req.body.description;
-        if (req.body.tags) article.tags = req.body.tags;
+        if (req.body.tag) article.tag = req.body.tag;
         article.save();
         res.status(200).json({
             success: true,
@@ -237,11 +244,11 @@ router.post('/article/:id/clap', checkToken, (req, res) => {
                 message: 'article not found'
             })
         }
-        return article.clap().then(() => {
-            res.status(200).json({
-                success: true,
-                article
-            })
+        article.clap();
+        article.save();
+        return res.status(200).json({
+            success: true,
+            article
         })
     })
 })
@@ -312,7 +319,45 @@ router.post('/article/:id/favorite', checkToken, (req, res) => {
     })
 })
 
-router.delete('/article/:id/unfavorite', checkToken, (req, res) => {
+router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
+    Article.findById({ _id: req.params.id }, (err, article) => {
+        console.log('finding article');
+        if (err) {
+            console.log('error occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!article) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'article not found'
+                })
+            }
+        }
+        console.log('gotten to 341');
+        const foundUser = article.favorites.filter(id => id == req.body.userId);
+        console.log('user found');
+        if (foundUser[0]) {
+            console.log('found user', foundUser[0]);
+            return;
+        } else {
+            console.log(req.body.userId);
+            article.favorites.push(req.body.userId);
+            console.log(article.favorites);
+        }
+        article.save();
+        return res.status(200).json({
+            success: true,
+            article
+        })
+    })
+})
+
+router.delete('/article/:id/favorite', checkToken, (req, res) => {
     User.findById({ _id: req.body.userId }, (err, user) => {
         if (err) {
             console.log('error occured', err);
@@ -334,6 +379,39 @@ router.delete('/article/:id/unfavorite', checkToken, (req, res) => {
         return res.status(200).json({
             success: true,
             user
+        })
+    })
+})
+
+router.delete('/article/:id/removeFavorites', checkToken, (req, res) => {
+    Article.findById({ _id: req.params.id }, (err, article) => {
+        if (err) {
+            console.log('error occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!article) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'article not found'
+                })
+            }
+        }
+        if (article.favorites && article.favorites.length !== 0) {
+            for (let i = 0; i < article.favorites.length; i++) {
+                if (article.favorites[i] == req.decoded.user._id) {
+                    article.favorites.splice(i, 1);
+                }
+            }
+        }
+        article.save();
+        return res.status(200).json({
+            success: true,
+            article
         })
     })
 })
@@ -367,12 +445,12 @@ router.get('/all', (req, res) => {
         skip = req.query.skip;
     }
     if (typeof req.query.tag !== 'undefined') {
-        query.tags = { "$in": [req.query.tag] };
+        query.tag = { "$in": [req.query.tag] };
     }
     Article.find(query)
         .skip(Number(skip))
         .limit(Number(limit))
-        .populate('author', 'name _id username',)
+        .populate('author', '_id username')
         .sort({ createdAt: 'desc' })
         .exec((err, articles) => {
             if (err) {
