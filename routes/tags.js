@@ -3,7 +3,7 @@ const Article = require('../models/Article');
 const router = express.Router();
 
 router.get('/all', (req, res, next) => {
-    Article.find().distinct('tags').then(tags => {
+    Article.find().distinct('tag').then(tags => {
         res.status(200).json({
             success: true,
             tags: tags

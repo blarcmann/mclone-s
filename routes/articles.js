@@ -338,11 +338,8 @@ router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
                 })
             }
         }
-        console.log('gotten to 341');
         const foundUser = article.favorites.filter(id => id == req.body.userId);
-        console.log('user found');
         if (foundUser[0]) {
-            console.log('found user', foundUser[0]);
             return;
         } else {
             console.log(req.body.userId);
