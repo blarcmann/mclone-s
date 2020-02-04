@@ -321,7 +321,6 @@ router.post('/article/:id/favorite', checkToken, (req, res) => {
 
 router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
     Article.findById({ _id: req.params.id }, (err, article) => {
-        console.log('finding article');
         if (err) {
             console.log('error occured', err);
             return res.status(500).json({
@@ -342,14 +341,11 @@ router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
         if (foundUser[0]) {
             return;
         } else {
-            console.log(req.body.userId);
             article.favorites.push(req.body.userId);
-            console.log(article.favorites);
         }
         article.save();
         return res.status(200).json({
-            success: true,
-            article
+            success: true
         })
     })
 })
@@ -380,7 +376,7 @@ router.delete('/article/:id/favorite', checkToken, (req, res) => {
     })
 })
 
-router.delete('/article/:id/removeFavorites', checkToken, (req, res) => {
+router.post('/article/:id/removeFavorites', checkToken, (req, res) => {
     Article.findById({ _id: req.params.id }, (err, article) => {
         if (err) {
             console.log('error occured', err);
@@ -407,8 +403,7 @@ router.delete('/article/:id/removeFavorites', checkToken, (req, res) => {
         }
         article.save();
         return res.status(200).json({
-            success: true,
-            article
+            success: true
         })
     })
 })
