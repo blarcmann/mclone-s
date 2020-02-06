@@ -23,6 +23,13 @@ UserSchema.methods.follow = function (id) {
     return this.save();
 };
 
+UserSchema.methods.authorize = function (id) {
+    if (this.articles.indexOf(id) === -1) {
+        this.articles.push(id);
+    }
+    return this.save();
+};
+
 UserSchema.methods.unfollow = function (id) {
     this.following.remove(id);
     return this.save();

@@ -14,7 +14,32 @@ cloudinary.config({
 });
 
 router.get('/', (req, res) => {
-    return res.send('it worked bitch!');
+    return res.send('it worked!');
+})
+
+router.post('/article/:id/fav', checkToken, (req, res) => {
+    User.findById({ _id: req.body.userId }, (err, user) => {
+        if (err) {
+            console.log('error occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!user) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'user not found'
+                })
+            }
+        }
+        user.favorite(req.params.id);
+        return res.status(200).json({
+            success: true
+        })
+    })
 })
 
 router.post('/create_article', checkToken, (req, res) => {
@@ -46,11 +71,10 @@ router.post('/create_article', checkToken, (req, res) => {
                         favorited: false,
                         author: req.body.author
                     });
+                    user.authorize(article._id);
                     article.save();
                     return res.status(201).json({
-                        success: true,
-                        message: 'successful',
-                        article
+                        success: true
                     });
                 })
             } else {
@@ -66,8 +90,6 @@ router.post('/create_article', checkToken, (req, res) => {
                 article.save();
                 res.status(201).json({
                     success: true,
-                    message: 'successful',
-                    article
                 });
             }
 
@@ -98,8 +120,7 @@ router.post('/article/:id/comment', checkToken, (req, res) => {
         article.comments.push(comment);
         article.save();
         return res.status(201).json({
-            success: true,
-            article
+            success: true
         })
     })
 })
@@ -108,7 +129,7 @@ router.get('/article/:id/comments', (req, res) => {
     Article.findById({ _id: req.params.id })
         .populate({
             path: 'comments',
-            populate: { path: 'author', select: 'name _id' },
+            populate: { path: 'author', select: 'name _id avatar' },
             options: { sort: { createdAt: 'desc' } }
         })
         .exec((err, article) => {
@@ -132,7 +153,7 @@ router.get('/article/:id/comments', (req, res) => {
         })
 })
 
-router.delete('/article/:id/:comment', checkToken, (req, res) => {
+router.post('/article/:id/:comment', checkToken, (req, res) => {
     User.findOne({ _id: req.decoded.user._id }, (err, user) => {
         if (err) {
             console.log('err occured', err);
@@ -154,8 +175,7 @@ router.delete('/article/:id/:comment', checkToken, (req, res) => {
                     article.comments.remove(req.body.comment_id)
                     article.save();
                     res.status(200).json({
-                        success: true,
-                        comments: article.comments
+                        success: true
                     })
                 }).catch(err => {
                     console.log('err occured ', err);
@@ -170,7 +190,7 @@ router.delete('/article/:id/:comment', checkToken, (req, res) => {
 
 router.get('/article/:id', (req, res) => {
     Article.findById({ _id: req.params.id })
-        .populate('author')
+        .populate('author', '_id name username avatar')
         .exec((err, article) => {
             if (err) {
                 console.log('err occured', err);
@@ -293,32 +313,6 @@ router.delete('/article/:id', checkToken, (req, res) => {
     })
 })
 
-router.post('/article/:id/favorite', checkToken, (req, res) => {
-    User.findById({ _id: req.body.userId }, (err, user) => {
-        if (err) {
-            console.log('error occured', err);
-            return res.status(500).json({
-                success: false,
-                message: 'error occured'
-            })
-        }
-        if (!user) {
-            if (err) {
-                console.log('user not found', err);
-                return res.status(500).json({
-                    success: false,
-                    message: 'user not found'
-                })
-            }
-        }
-        user.favorite(req.params.id);
-        return res.status(200).json({
-            success: true,
-            user
-        })
-    })
-})
-
 router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
     Article.findById({ _id: req.params.id }, (err, article) => {
         if (err) {
@@ -346,32 +340,6 @@ router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
         article.save();
         return res.status(200).json({
             success: true
-        })
-    })
-})
-
-router.delete('/article/:id/favorite', checkToken, (req, res) => {
-    User.findById({ _id: req.body.userId }, (err, user) => {
-        if (err) {
-            console.log('error occured', err);
-            return res.status(500).json({
-                success: false,
-                message: 'error occured'
-            })
-        }
-        if (!user) {
-            if (err) {
-                console.log('user not found', err);
-                return res.status(500).json({
-                    success: false,
-                    message: 'user not found'
-                })
-            }
-        }
-        user.unfavorite(req.params.id);
-        return res.status(200).json({
-            success: true,
-            user
         })
     })
 })

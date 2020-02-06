@@ -162,13 +162,12 @@ router.post('/follow/:id', checkToken, (req, res) => {
         }
         user.follow(req.params.id);
         return res.status(200).json({
-            success: true,
-            user
+            success: true
         })
     })
 })
 
-router.delete('/unfollow/:id', checkToken, (req, res) => {
+router.post('/unfollow/:id', checkToken, (req, res) => {
     User.findById({ _id: req.body.userId }, (err, user) => {
         if (err) {
             console.log('err occured', err);
@@ -188,8 +187,7 @@ router.delete('/unfollow/:id', checkToken, (req, res) => {
         }
         user.unfollow(req.params.id);
         return res.status(200).json({
-            success: true,
-            user
+            success: true
         })
     })
 })
