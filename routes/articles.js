@@ -42,6 +42,69 @@ router.post('/article/:id/fav', checkToken, (req, res) => {
     })
 })
 
+router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
+    Article.findById({ _id: req.params.id }, (err, article) => {
+        if (err) {
+            console.log('error occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!article) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'article not found'
+                })
+            }
+        }
+        const foundUser = article.favorites.filter(id => id == req.body.userId);
+        if (foundUser[0]) {
+            return;
+        } else {
+            article.favorites.push(req.body.userId);
+        }
+        article.save();
+        return res.status(200).json({
+            success: true
+        })
+    })
+})
+
+router.post('/article/:id/removeFavorites', checkToken, (req, res) => {
+    Article.findById({ _id: req.params.id }, (err, article) => {
+        if (err) {
+            console.log('error occured', err);
+            return res.status(500).json({
+                success: false,
+                message: 'error occured'
+            })
+        }
+        if (!article) {
+            if (err) {
+                console.log('user not found', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'article not found'
+                })
+            }
+        }
+        if (article.favorites && article.favorites.length !== 0) {
+            for (let i = 0; i < article.favorites.length; i++) {
+                if (article.favorites[i] == req.decoded.user._id) {
+                    article.favorites.splice(i, 1);
+                }
+            }
+        }
+        article.save();
+        return res.status(200).json({
+            success: true
+        })
+    })
+})
+
 router.post('/create_article', checkToken, (req, res) => {
     User.findById({ _id: req.body.author })
         .then(user => {
@@ -309,69 +372,6 @@ router.delete('/article/:id', checkToken, (req, res) => {
                     message: 'id does not match'
                 })
             }
-        })
-    })
-})
-
-router.post('/article/:id/updateFavorites', checkToken, (req, res) => {
-    Article.findById({ _id: req.params.id }, (err, article) => {
-        if (err) {
-            console.log('error occured', err);
-            return res.status(500).json({
-                success: false,
-                message: 'error occured'
-            })
-        }
-        if (!article) {
-            if (err) {
-                console.log('user not found', err);
-                return res.status(500).json({
-                    success: false,
-                    message: 'article not found'
-                })
-            }
-        }
-        const foundUser = article.favorites.filter(id => id == req.body.userId);
-        if (foundUser[0]) {
-            return;
-        } else {
-            article.favorites.push(req.body.userId);
-        }
-        article.save();
-        return res.status(200).json({
-            success: true
-        })
-    })
-})
-
-router.post('/article/:id/removeFavorites', checkToken, (req, res) => {
-    Article.findById({ _id: req.params.id }, (err, article) => {
-        if (err) {
-            console.log('error occured', err);
-            return res.status(500).json({
-                success: false,
-                message: 'error occured'
-            })
-        }
-        if (!article) {
-            if (err) {
-                console.log('user not found', err);
-                return res.status(500).json({
-                    success: false,
-                    message: 'article not found'
-                })
-            }
-        }
-        if (article.favorites && article.favorites.length !== 0) {
-            for (let i = 0; i < article.favorites.length; i++) {
-                if (article.favorites[i] == req.decoded.user._id) {
-                    article.favorites.splice(i, 1);
-                }
-            }
-        }
-        article.save();
-        return res.status(200).json({
-            success: true
         })
     })
 })

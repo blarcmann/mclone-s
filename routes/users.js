@@ -103,6 +103,21 @@ router.post('/login', (req, res) => {
         })
 })
 
+router.get('/user/:id', (req, res) => {
+    User.findOne({ _id: req.params.id }, (err, user) => {
+        if (err) {
+            res.json({
+                success: false,
+                message: `some error occured, try later, ${err}`
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                user: user
+            });
+        }
+    })
+})
 router.route('/profile')
     .get(checkToken, (req, res, next) => {
         User.findOne({ _id: req.decoded.user._id }, (err, user) => {
