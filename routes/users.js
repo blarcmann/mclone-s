@@ -137,18 +137,13 @@ router.route('/profile')
     })
     .put(checkToken, (req, res, next) => {
         User.findOne({ _id: req.decoded.user._id }, (err, user) => {
-            if (err) {
-                return next(err);
-            }
-            if (req.body.name) {
-                user.name = req.body.name
-            }
-            if (req.body.username) {
-                user.name = req.body.name
-            }
-            if (req.body.bio) {
-                user.name = req.body.name
-            }
+            if (err) return next(err);
+            if (req.body.name) user.name = req.body.name
+            if (req.body.username) user.username = req.body.username
+            if (req.body.bio) user.bio = req.body.bio
+            if (req.body.facebook) user.facebook = req.body.facebook
+            if (req.body.twitter) user.twitter = req.body.twitter
+            if (req.body.instagram) user.instagram = req.body.instagram
             user.save();
             res.status(200).json({
                 success: true,

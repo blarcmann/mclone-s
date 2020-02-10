@@ -10,6 +10,9 @@ const UserSchema = new Schema({
     bio: { type: String },
     password: { type: String, required: true },
     avatar: { type: String },
+    twitter: { type: String },
+    instagram: { type: String },
+    facebook: { type: String },
     articles: [{ type: Schema.Types.ObjectId, ref: 'Article' }],
     favorites: [{ type: Schema.Types.ObjectId, ref: 'Article' }],
     following: [{ type: Schema.Types.ObjectId, ref: 'User' }]
