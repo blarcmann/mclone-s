@@ -290,25 +290,37 @@ router.put('/article/:id', checkToken, (req, res) => {
                 message: 'article not found'
             })
         }
-        if (article.favorites && article.favorites.length !== 0) {
-            article.favorites.forEach(fav => {
-                if (fav === req.decoded.user._id) {
-                    return article.favorited = true;
-                } else {
-                    return article.favorited = false;
+        if (req.files['feature_img']) {
+            const file = req.files['feature_img'];
+            cloudinary.uploader.upload(file.tempFilePath, (err, result) => {
+                if (err) {
+                    console.log('error occured while uploading', err);
+                    return res.status(501).json({
+                        success: false,
+                        message: 'error occured while uploading to cloudinary'
+                    })
                 }
+                let img_url = result.url;
+                article.feature_img = img_url
+                if (req.body.title) article.title = req.body.title;
+                if (req.body.body) article.body = req.body.body;
+                if (req.body.description) article.description = req.body.description;
+                if (req.body.tag) article.tag = req.body.tag;
+                article.save();
+                return res.status(200).json({
+                    success: true
+                });
             })
+        } else {
+            if (req.body.title) article.title = req.body.title;
+            if (req.body.body) article.body = req.body.body;
+            if (req.body.description) article.description = req.body.description;
+            if (req.body.tag) article.tag = req.body.tag;
+            article.save();
+            res.status(200).json({
+                success: true,
+            });
         }
-
-        if (req.body.title) article.title = req.body.title;
-        if (req.body.body) article.body = req.body.body;
-        if (req.body.description) article.description = req.body.description;
-        if (req.body.tag) article.tag = req.body.tag;
-        article.save();
-        res.status(200).json({
-            success: true,
-            article
-        })
     })
 })
 
