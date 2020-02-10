@@ -290,7 +290,7 @@ router.put('/article/:id', checkToken, (req, res) => {
                 message: 'article not found'
             })
         }
-        if (req.files['feature_img']) {
+        if (req.files && req.files['feature_img']) {
             const file = req.files['feature_img'];
             cloudinary.uploader.upload(file.tempFilePath, (err, result) => {
                 if (err) {
@@ -348,7 +348,7 @@ router.post('/article/:id/clap', checkToken, (req, res) => {
     })
 })
 
-router.delete('/article/:id', checkToken, (req, res) => {
+router.post('/delete/:id', checkToken, (req, res) => {
     User.findOne({ _id: req.decoded.user._id }, (err, user) => {
         if (err) {
             console.log('err occured', err);
