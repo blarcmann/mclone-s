@@ -18,7 +18,7 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 mongoose
-    .connect(db)
+    .connect(db, { useNewUrlParser: true })
     .then(() => console.log('Curve the cake'))
     .catch((error) => console.log('ERR', error))
 
