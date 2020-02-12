@@ -373,6 +373,7 @@ router.post('/delete/:id', checkToken, (req, res) => {
 
             if (req.body.author_id.toString() === user._id.toString()) {
                 article.remove();
+                user.unfavorite(req.param.id)
                 res.status(200).json({
                     success: true,
                     message: 'article deleted'
