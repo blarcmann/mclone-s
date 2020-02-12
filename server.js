@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('./config/keys').mongoURI;
+require('dotenv').config();
+const db = process.env.DB_URI;
 const users = require('./routes/users');
 const articles = require('./routes/articles');
 const tags = require('./routes/tags');
@@ -17,9 +18,9 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 mongoose
-.connect(db)
-.then(() => console.log('Curve the cake'))
-.catch((error) => console.log('ERR', error))
+    .connect(db)
+    .then(() => console.log('Curve the cake'))
+    .catch((error) => console.log('ERR', error))
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -31,7 +32,7 @@ app.use('/api/users', users);
 app.use('/api/articles', articles);
 app.use('/api/tags', tags);
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
     console.log(`twerking on ${port}`);

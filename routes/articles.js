@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const config = require('../config/keys');
 const User = require('../models/User');
 const Article = require('../models/Article');
 const Comment = require('../models/Comment');
@@ -8,9 +7,9 @@ const checkToken = require('../middlewares/check-token');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
-    cloud_name: config.cloud_name,
-    api_key: config.api_key,
-    api_secret: config.api_secret
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET
 });
 
 router.get('/', (req, res) => {

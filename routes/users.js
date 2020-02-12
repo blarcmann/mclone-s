@@ -91,7 +91,7 @@ router.post('/login', (req, res) => {
                                 message: 'Password seems incorrect. Authentication failed!'
                             });
                         } else {
-                            var token = jwt.sign({ user: user }, config.secret, { expiresIn: '7d' });
+                            var token = jwt.sign({ user: user }, process.env.DB_SECRET, { expiresIn: '7d' });
                             res.status(200).json({
                                 success: true,
                                 token: token
