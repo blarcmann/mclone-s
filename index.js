@@ -12,7 +12,6 @@ const fileUpload = require('express-fileupload');
 const app = express();
 app.use(cors());
 
-
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
